@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		_LinkFileRef_AlchemyRandom_via_AlchemyRandomTestSuite /* AlchemyRandom.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_AlchemyRandom" /* AlchemyRandom.framework */; };
-		__src_cc_ref_Sources/AlchemyRandom.swift /* AlchemyRandom.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/AlchemyRandom.swift /* AlchemyRandom.swift */; };
+		__src_cc_ref_Sources/AlchemyRandom.swift /* EntropySource.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/AlchemyRandom.swift /* EntropySource.swift */; };
 		__src_cc_ref_Tests/AlchemyRandom/AlchemyRandomTests.swift /* AlchemyRandomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/AlchemyRandom/AlchemyRandomTests.swift /* AlchemyRandomTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -30,7 +30,7 @@
 		__PBXFileRef_AlchemyRandomTestSuite_Info.plist /* AlchemyRandomTestSuite_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = AlchemyRandomTestSuite_Info.plist; path = AlchemyRandom.xcodeproj/AlchemyRandomTestSuite_Info.plist; sourceTree = SOURCE_ROOT; };
 		__PBXFileRef_AlchemyRandom_Info.plist /* AlchemyRandom_Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = AlchemyRandom_Info.plist; path = AlchemyRandom.xcodeproj/AlchemyRandom_Info.plist; sourceTree = SOURCE_ROOT; };
 		__PBXFileRef_Package.swift /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		__PBXFileRef_Sources/AlchemyRandom.swift /* AlchemyRandom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AlchemyRandom.swift; path = Sources/AlchemyRandom.swift; sourceTree = "<group>"; };
+		__PBXFileRef_Sources/AlchemyRandom.swift /* EntropySource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EntropySource.swift; path = Sources/EntropySource.swift; sourceTree = "<group>"; };
 		__PBXFileRef_Tests/AlchemyRandom/AlchemyRandomTests.swift /* AlchemyRandomTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlchemyRandomTests.swift; sourceTree = "<group>"; };
 		"_____Product_AlchemyRandom" /* AlchemyRandom.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AlchemyRandom.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"_____Product_AlchemyRandomTestSuite" /* AlchemyRandomTestSuite.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = AlchemyRandomTestSuite.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -107,7 +107,7 @@
 		"_____Sources_" /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				__PBXFileRef_Sources/AlchemyRandom.swift /* AlchemyRandom.swift */,
+				__PBXFileRef_Sources/AlchemyRandom.swift /* EntropySource.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -196,7 +196,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				__src_cc_ref_Sources/AlchemyRandom.swift /* AlchemyRandom.swift in Sources */,
+				__src_cc_ref_Sources/AlchemyRandom.swift /* EntropySource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

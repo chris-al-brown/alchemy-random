@@ -57,6 +57,8 @@ Check out 'Demo.playground' for example usage.
 
 ## References
 
+1. [Random Number Generators in Swift](http://www.cocoawithlove.com/blog/2016/05/19/random-numbers.html)
+
 ## License
 
 AlchemyRandom is released under the [MIT License](LICENSE.md).

@@ -24,4 +24,16 @@
 // 06/23/2016
 // -----------------------------------------------------------------------------
 
-//import AlchemyRandom
+import AlchemyRandom
+
+let arc4 = Arc4Random()
+arc4.randomBytes() as UInt32
+arc4.randomBytes() as UInt32
+arc4.randomBytes() as UInt32
+arc4.randomBytes() as UInt32
+
+let dev = DevRandom()
+dev.randomBytes() as UInt32
+dev.randomBytes() as UInt32
+dev.randomBytes() as UInt32
+dev.randomBytes() as UInt32
