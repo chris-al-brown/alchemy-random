@@ -116,6 +116,85 @@ extension ReversibleRandomNumberGenerator {
 }
 
 /// ...
+public struct Xoroshiro128Plus: RandomNumberGenerator {
+
+    /// ...
+    public typealias Seed = (UInt64, UInt64)
+
+    /// ...
+    public init<Source: EntropySource>(source: Source) {
+        var seed0: UInt64 = source.randomBytes()
+        var seed1: UInt64 = source.randomBytes()
+        while seed0 == 0 && seed1 == 0 {
+            seed0 = source.randomBytes()
+            seed1 = source.randomBytes()
+        }
+        self.init(seed0:seed0, seed1:seed1)
+    }
+    
+    /// ...
+    public init(seed0: UInt64, seed1: UInt64) {
+        precondition(seed0 != 0 || seed1 != 0, "A 128-bit seed value of 0x0 is strictly not allowed")
+        self.seed = (seed0, seed1)
+    }
+    
+    /// ...
+    public mutating func nextBool() -> Bool {
+        return nextSeed() % 2 == 0
+    }
+    
+    /// ...
+    public mutating func nextDouble(in range: Range<Double>) -> Double {
+        let min = range.lowerBound
+        let max = range.upperBound
+        return min + (max - min) * Xoroshiro128Plus.bitCast(seed:nextSeed())
+    }
+    
+    /// ...
+    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
+        let kLength = UInt64(range.count)
+        let kEngine = UInt64.max
+        let kExcess = kEngine % (kLength + 1)
+        let kLimit = kEngine - kExcess
+        var vSeed = nextSeed()
+        while vSeed > kLimit {
+            vSeed = nextSeed()
+        }
+        return Int(vSeed % kLength) + range.lowerBound
+    }
+    
+    /// ...
+    private mutating func nextSeed() -> UInt64 {
+        let s0 = seed.0
+        var s1 = seed.1
+        s1 ^= s0
+        seed.0 = ((s0 << 55) | (s0 >> 9)) ^ s1 ^ (s1 << 14)
+        seed.1 = ((s1 << 36) | (s1 >> 28))
+        return seed.0 &+ seed.1
+    }
+    
+    /// ...
+    public var seed: Seed
+}
+
+/// ...
+extension Xoroshiro128Plus: CustomStringConvertible {
+    
+    /// ...
+    public var description: String {
+        let seed0 = Xoroshiro128Plus.describe(seed:seed.0)
+        let seed1 = Xoroshiro128Plus.describe(seed:seed.1)
+        return "Xoroshiro128Plus(0x\(seed0)\(seed1))"
+    }
+}
+
+/// ...
+extension Xoroshiro128Plus: Equatable {}
+public func ==(lhs: Xoroshiro128Plus, rhs: Xoroshiro128Plus) -> Bool {
+    return lhs.seed == rhs.seed
+}
+
+/// ...
 public struct Xorshift128Plus: RandomNumberGenerator {
     
     /// ...
