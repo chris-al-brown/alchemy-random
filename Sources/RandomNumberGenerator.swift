@@ -33,16 +33,16 @@ public protocol RandomNumberGenerator {
     associatedtype Seed
     
     /// ...
-    init<Source: EntropySource>(entropySource source: Source)
+    init<Source: EntropySource>(source: Source)
 
     /// ...
-    mutating func nextRandomBool() -> Bool
+    mutating func nextBool() -> Bool
 
     /// ...
-    mutating func nextRandomDouble(in range: Range<Double>) -> Double
+    mutating func nextDouble(in range: Range<Double>) -> Double
 
     /// ...
-    mutating func nextRandomInt(in range: CountableRange<Int>) -> Int
+    mutating func nextInt(in range: CountableRange<Int>) -> Int
 
     /// ...
     var seed: Seed { get mutating set }
@@ -68,23 +68,23 @@ extension RandomNumberGenerator {
     }
     
     /// ...
-    public static func describe(seed: UInt32, usingUppercase ucase: Bool = false) -> String {
-        return String(seed, radix:16, uppercase:ucase)
+    public static func describe(seed: UInt32, uppercase: Bool = false) -> String {
+        return String(seed, radix:16, uppercase:uppercase)
     }
 
     /// ...
-    public static func describe(seed: UInt64, usingUppercase ucase: Bool = false) -> String {
-        return String(seed, radix:16, uppercase:ucase)
+    public static func describe(seed: UInt64, uppercase: Bool = false) -> String {
+        return String(seed, radix:16, uppercase:uppercase)
     }
     
     /// ...
-    public mutating func nextRandomDouble(in range: ClosedRange<Double>) -> Double {
-        return nextRandomDouble(in:range.lowerBound..<range.upperBound.nextUp)
+    public mutating func nextDouble(in range: ClosedRange<Double>) -> Double {
+        return nextDouble(in:range.lowerBound..<range.upperBound.nextUp)
     }
     
     /// ...
-    public mutating func nextRandomInt(in range: CountableClosedRange<Int>) -> Int {
-        return nextRandomInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
+    public mutating func nextInt(in range: CountableClosedRange<Int>) -> Int {
+        return nextInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
     }
 }
 
@@ -92,26 +92,26 @@ extension RandomNumberGenerator {
 public protocol ReversibleRandomNumberGenerator: RandomNumberGenerator {
 
     /// ...
-    func previousRandomBool() -> Bool
+    func previousBool() -> Bool
     
     /// ...
-    func previousRandomDouble(in range: Range<Double>) -> Double
+    func previousDouble(in range: Range<Double>) -> Double
     
     /// ...
-    func previousRandomInt(in range: Range<Int>) -> Int
+    func previousInt(in range: Range<Int>) -> Int
 }
 
 /// ...
 extension ReversibleRandomNumberGenerator {
     
     /// ...
-    public mutating func previousRandomDouble(in range: ClosedRange<Double>) -> Double {
-        return previousRandomDouble(in:range.lowerBound..<range.upperBound.nextUp)
+    public mutating func previousDouble(in range: ClosedRange<Double>) -> Double {
+        return previousDouble(in:range.lowerBound..<range.upperBound.nextUp)
     }
     
     /// ...
-    public mutating func previousRandomInt(in range: CountableClosedRange<Int>) -> Int {
-        return previousRandomInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
+    public mutating func previousInt(in range: CountableClosedRange<Int>) -> Int {
+        return previousInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
     }
 }
 
@@ -122,29 +122,36 @@ public struct Xorshift128Plus: RandomNumberGenerator {
     public typealias Seed = (UInt64, UInt64)
     
     /// ...
-    public init<Source: EntropySource>(entropySource source: Source) {
-        self.init(seed0:source.randomBytes(), seed1:source.randomBytes())
+    public init<Source: EntropySource>(source: Source) {
+        var seed0: UInt64 = source.randomBytes()
+        var seed1: UInt64 = source.randomBytes()
+        while seed0 == 0 && seed1 == 0 {
+            seed0 = source.randomBytes()
+            seed1 = source.randomBytes()
+        }
+        self.init(seed0:seed0, seed1:seed1)
     }
 
     /// ...
     public init(seed0: UInt64, seed1: UInt64) {
+        precondition(seed0 != 0 || seed1 != 0, "A 128-bit seed value of 0x0 is strictly not allowed")
         self.seed = (seed0, seed1)
     }
 
     /// ...
-    public mutating func nextRandomBool() -> Bool {
+    public mutating func nextBool() -> Bool {
         return nextSeed() % 2 == 0
     }
     
     /// ...
-    public mutating func nextRandomDouble(in range: Range<Double>) -> Double {
+    public mutating func nextDouble(in range: Range<Double>) -> Double {
         let min = range.lowerBound
         let max = range.upperBound
         return min + (max - min) * Xorshift128Plus.bitCast(seed:nextSeed())
     }
     
     /// ...
-    public mutating func nextRandomInt(in range: CountableRange<Int>) -> Int {
+    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
         let kLength = UInt64(range.count)
         let kEngine = UInt64.max
         let kExcess = kEngine % (kLength + 1)
