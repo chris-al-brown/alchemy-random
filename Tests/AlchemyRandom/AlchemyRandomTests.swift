@@ -28,13 +28,10 @@ import XCTest
 @testable import AlchemyRandom
 
 /// ...
-let sampleCount = 100_000
-
-/// ...
 class AlchemyRandomTests: XCTestCase {
 
     /// ...
-    func assayEntropySource<Source: EntropySource>(source: Source) {
+    func assayEntropySource<Source: EntropySource>(_ source: Source, sampleCount: Int = 10_000) {
         let byteCount = 32
         var buffer = Array(repeating:UInt8(), count:byteCount)
         for _ in 0..<sampleCount {
@@ -47,17 +44,83 @@ class AlchemyRandomTests: XCTestCase {
             XCTAssert(0 < mean && mean < 255, "\(source) randomBytes(destination:byteCount:) failed")
         }
     }
+ 
+    /// ...
+    func assayRandomNumberGeneratorBool<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+        let bools = (0..<sampleCount).map {_ in return rng.nextBool()}
+        let heads = (bools.filter() {return $0}).count
+        let tails = bools.count - heads
+        let bias = abs(heads - tails)
+        let acceptable = sampleCount / 100
+        XCTAssert(bias <= acceptable, "\(rng) is Bernoulli biased (\(bias) > \(acceptable))")
+    }
+    
+    /// ...
+    func assayRandomNumberGeneratorDouble<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+        let open = (0..<sampleCount).map {_ in return rng.nextDouble(in:0.0..<1.0)}
+        XCTAssert(open.min() >= 0.0 && open.max() < 1.0, "\(rng) failed range test in [0.0, 1.0)")
+        let closed = (0..<sampleCount).map {_ in return rng.nextDouble(in:0.0...1.0)}
+        XCTAssert(closed.min() >= 0.0 && closed.max() <= 1.0, "\(rng) failed range test in [0.0, 1.0]")
+    }
+    
+    /// ...
+    func assayRandomNumberGeneratorInt<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+        let open = (0..<sampleCount).map {_ in return rng.nextInt(in:0..<10)}
+        XCTAssert(open.min() == 0 && open.max() < 10, "\(rng) failed range test in [0, 10)")
+        let closed = (0..<sampleCount).map {_ in return rng.nextInt(in:0...10)}
+        XCTAssert(closed.min() == 0 && closed.max() == 10, "\(rng) failed range test in [0, 10]")
+    }
+
+    /// ...
+    func assayRandomNumberGeneratorPeriod<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+        let rng1 = rng
+        for i in 0..<sampleCount {
+            _ = rng.nextBool()
+            let rng2 = rng
+            XCTAssert(rng1 != rng2, "\(rng1) repeated state after \(i) iterations")
+        }
+    }
+
+    /// ...
+    func assayRandomNumberGeneratorUtils() {
+        XCTAssert(Xorshift128Plus.bitCast(seed:UInt32.min) == 0.0, "RandomNumberGenerator.bitCast(seed:\(UInt32.min)) failed")
+        XCTAssert(1.0 - Xorshift128Plus.bitCast(seed:UInt32.max) == FLT_EPSILON, "RandomNumberGenerator.bitCast(seed:\(UInt32.max)) failed")
+        XCTAssert(Xorshift128Plus.bitCast(seed:UInt64.min) == 0.0, "RandomNumberGenerator.bitCast(seed:\(UInt64.min)) failed")
+        XCTAssert(1.0 - Xorshift128Plus.bitCast(seed:UInt64.max) == DBL_EPSILON, "RandomNumberGenerator.bitCast(seed:\(UInt64.max)) failed")
+    }
+
+    /// ...
+    func assayRandomNumberGenerator<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+        assayRandomNumberGeneratorPeriod(&rng)
+        assayRandomNumberGeneratorBool(&rng)
+        assayRandomNumberGeneratorDouble(&rng)
+        assayRandomNumberGeneratorInt(&rng)
+    }
     
     /// ...
     func testEntropySources() {
-        assayEntropySource(source:Arc4Random())
-        assayEntropySource(source:DevURandom())
+        assayEntropySource(Arc4Random())
+        assayEntropySource(DevURandom())
+    }
+    
+    /// ... 
+    func testRandomNumberGenerators() {
+        assayRandomNumberGeneratorUtils()
+        var xorshift = Xorshift128Plus(source:Arc4Random())
+        assayRandomNumberGenerator(&xorshift)
+        xorshift.seed = (0, 1)
+        assayRandomNumberGenerator(&xorshift)
+        xorshift.seed = (1, 0)
+        assayRandomNumberGenerator(&xorshift)
+        xorshift.seed = (UInt64.max, UInt64.max)
+        assayRandomNumberGenerator(&xorshift)
     }
 
     /// ...
     static var allTests : [(String, (AlchemyRandomTests) -> () throws -> Void)] {
         return [
             ("testEntropySources", testEntropySources),
+            ("testRandomNumberGenerators", testRandomNumberGenerators)
         ]
     }
 }
