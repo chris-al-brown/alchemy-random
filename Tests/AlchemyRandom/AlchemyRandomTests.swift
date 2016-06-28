@@ -31,7 +31,7 @@ import XCTest
 class AlchemyRandomTests: XCTestCase {
 
     /// ...
-    func assayEntropySource<Source: EntropySource>(_ source: Source, sampleCount: Int = 10_000) {
+    func assayEntropySource<Source: EntropySource>(_ source: Source, sampleCount: Int) {
         let byteCount = 32
         var buffer = Array(repeating:UInt8(), count:byteCount)
         for _ in 0..<sampleCount {
@@ -46,17 +46,17 @@ class AlchemyRandomTests: XCTestCase {
     }
  
     /// ...
-    func assayRandomNumberGeneratorBool<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+    func assayRandomNumberGeneratorBool<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, acceptance: Double, sampleCount: Int) {
         let bools = (0..<sampleCount).map {_ in return rng.nextBool()}
         let heads = (bools.filter() {return $0}).count
         let tails = bools.count - heads
         let bias = abs(heads - tails)
-        let acceptable = sampleCount / 100
-        XCTAssert(bias <= acceptable, "\(rng) is Bernoulli biased (\(bias) > \(acceptable))")
+        let allowed = Int(acceptance * Double(sampleCount))
+        XCTAssert(bias <= allowed, "\(rng) is Bernoulli biased: \(Double(bias) / Double(sampleCount)) > \(acceptance)")
     }
     
     /// ...
-    func assayRandomNumberGeneratorDouble<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+    func assayRandomNumberGeneratorDouble<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int) {
         let open = (0..<sampleCount).map {_ in return rng.nextDouble(in:0.0..<1.0)}
         XCTAssert(open.min() >= 0.0 && open.max() < 1.0, "\(rng) failed range test in [0.0, 1.0)")
         let closed = (0..<sampleCount).map {_ in return rng.nextDouble(in:0.0...1.0)}
@@ -64,7 +64,7 @@ class AlchemyRandomTests: XCTestCase {
     }
     
     /// ...
-    func assayRandomNumberGeneratorInt<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+    func assayRandomNumberGeneratorInt<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int) {
         let open = (0..<sampleCount).map {_ in return rng.nextInt(in:0..<10)}
         XCTAssert(open.min() == 0 && open.max() < 10, "\(rng) failed range test in [0, 10)")
         let closed = (0..<sampleCount).map {_ in return rng.nextInt(in:0...10)}
@@ -72,7 +72,7 @@ class AlchemyRandomTests: XCTestCase {
     }
 
     /// ...
-    func assayRandomNumberGeneratorPeriod<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
+    func assayRandomNumberGeneratorPeriod<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int) {
         let rng1 = rng
         for i in 0..<sampleCount {
             _ = rng.nextBool()
@@ -90,17 +90,17 @@ class AlchemyRandomTests: XCTestCase {
     }
 
     /// ...
-    func assayRandomNumberGenerator<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int = 100_000) {
-        assayRandomNumberGeneratorPeriod(&rng)
-        assayRandomNumberGeneratorBool(&rng)
-        assayRandomNumberGeneratorDouble(&rng)
-        assayRandomNumberGeneratorInt(&rng)
+    func assayRandomNumberGenerator<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, bias: Double, sampleCount: Int) {
+        assayRandomNumberGeneratorPeriod(&rng, sampleCount:sampleCount)
+        assayRandomNumberGeneratorBool(&rng, acceptance:bias, sampleCount:sampleCount)
+        assayRandomNumberGeneratorDouble(&rng, sampleCount:sampleCount)
+        assayRandomNumberGeneratorInt(&rng, sampleCount:sampleCount)
     }
     
     /// ...
     func testEntropySources() {
-        assayEntropySource(Arc4Random())
-        assayEntropySource(DevURandom())
+        assayEntropySource(Arc4Random(), sampleCount:50_000)
+        assayEntropySource(DevURandom(), sampleCount:50_000)
     }
     
     /// ... 
@@ -109,24 +109,47 @@ class AlchemyRandomTests: XCTestCase {
         do {
             /// Xorshift128+
             var xorshift = Xorshift128Plus(source:Arc4Random())
-            assayRandomNumberGenerator(&xorshift)
-            xorshift.seed = (0, 1)
-            assayRandomNumberGenerator(&xorshift)
+            assayRandomNumberGenerator(&xorshift, bias:0.01, sampleCount:50_000)
             xorshift.seed = (1, 0)
-            assayRandomNumberGenerator(&xorshift)
+            assayRandomNumberGenerator(&xorshift, bias:0.01, sampleCount:50_000)
+            xorshift.seed = (0, 1)
+            assayRandomNumberGenerator(&xorshift, bias:0.01, sampleCount:50_000)
             xorshift.seed = (UInt64.max, UInt64.max)
-            assayRandomNumberGenerator(&xorshift)
+            assayRandomNumberGenerator(&xorshift, bias:0.01, sampleCount:50_000)
         }
         do {
             /// Xoroshiro128+
             var xoroshiro = Xoroshiro128Plus(source:Arc4Random())
-            assayRandomNumberGenerator(&xoroshiro)
-            xoroshiro.seed = (0, 1)
-            assayRandomNumberGenerator(&xoroshiro)
+            assayRandomNumberGenerator(&xoroshiro, bias:0.01, sampleCount:50_000)
             xoroshiro.seed = (1, 0)
-            assayRandomNumberGenerator(&xoroshiro)
+            assayRandomNumberGenerator(&xoroshiro, bias:0.01, sampleCount:50_000)
+            xoroshiro.seed = (0, 1)
+            assayRandomNumberGenerator(&xoroshiro, bias:0.01, sampleCount:50_000)
             xoroshiro.seed = (UInt64.max, UInt64.max)
-            assayRandomNumberGenerator(&xoroshiro)
+            assayRandomNumberGenerator(&xoroshiro, bias:0.01, sampleCount:50_000)
+        }
+        do {
+            /// LecuyerLCG4
+            var lecuyer = LecuyerLCG4(source:Arc4Random())
+            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
+            lecuyer.seed = (1, 0, 0, 0)
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            lecuyer.seed = (0, 1, 0, 0)
+            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
+            lecuyer.seed = (0, 0, 1, 0)
+            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
+            lecuyer.seed = (0, 0, 0, 1)
+            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
+            lecuyer.seed = (UInt32.max, UInt32.max, UInt32.max, UInt32.max)
+            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
+            
+            for _ in 0..<25_000 {
+                lecuyer = LecuyerLCG4(source:Arc4Random())
+                let value1 = lecuyer.nextDouble(in:0.0..<1.0)
+                _ = lecuyer.nextDouble(in:0.0..<1.0)
+                let value2 = lecuyer.previousDouble(in:0.0..<1.0)
+                XCTAssert(value1 == value2, "\(lecuyer) failed reversibility test")
+            }
         }
     }
 

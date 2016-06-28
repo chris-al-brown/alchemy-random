@@ -66,3 +66,8 @@ xorshift.nextDouble(in:0.0...1.0)
 xorshift.nextDouble(in:0.0...1.0)
 xorshift.nextDouble(in:0.0...1.0)
 
+var lecuyer = LecuyerLCG4(source:DevURandom())
+lecuyer.nextDouble(in:0.0..<1.0)
+lecuyer.nextDouble(in:0.0..<1.0)
+lecuyer.previousDouble(in:0.0..<1.0)
+lecuyer.previousDouble(in:0.0..<1.0)
