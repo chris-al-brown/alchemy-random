@@ -24,6 +24,7 @@
 // 06/23/2016
 // -----------------------------------------------------------------------------
 
+import Foundation
 import AlchemyRandom
 
 let arc4 = Arc4Random()
@@ -32,8 +33,40 @@ arc4.randomBytes() as UInt32
 arc4.randomBytes() as UInt32
 arc4.randomBytes() as UInt32
 
-let dev = DevRandom()
+let dev = DevURandom()
 dev.randomBytes() as UInt32
 dev.randomBytes() as UInt32
 dev.randomBytes() as UInt32
 dev.randomBytes() as UInt32
+
+var xorshift = Xorshift128Plus(entropySource:dev)
+xorshift.nextRandomBool()
+xorshift.nextRandomBool()
+xorshift.nextRandomBool()
+xorshift.nextRandomBool()
+
+Xorshift128Plus.bitCast(seed:UInt32.min)
+1.0 - Xorshift128Plus.bitCast(seed:UInt32.max) == FLT_EPSILON
+
+Xorshift128Plus.bitCast(seed:UInt64.min)
+1.0 - Xorshift128Plus.bitCast(seed:UInt64.max) == DBL_EPSILON
+
+var range = 0...10
+var values: [Int: Int] = [:]
+for i in range.lowerBound...range.upperBound {
+    values[i] = 0
+}
+for i in 0..<1_000_000 {
+    values[xorshift.nextRandomInt(in:range)]! += 1
+}
+values
+
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)
+xorshift.nextRandomDouble(in:0.0...1.0)

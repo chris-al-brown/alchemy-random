@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8327D3591D213F84003CCB11 /* RandomNumberGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8327D3581D213F84003CCB11 /* RandomNumberGenerator.swift */; };
 		_LinkFileRef_AlchemyRandom_via_AlchemyRandomTestSuite /* AlchemyRandom.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "_____Product_AlchemyRandom" /* AlchemyRandom.framework */; };
 		__src_cc_ref_Sources/AlchemyRandom.swift /* EntropySource.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Sources/AlchemyRandom.swift /* EntropySource.swift */; };
 		__src_cc_ref_Tests/AlchemyRandom/AlchemyRandomTests.swift /* AlchemyRandomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = __PBXFileRef_Tests/AlchemyRandom/AlchemyRandomTests.swift /* AlchemyRandomTests.swift */; };
@@ -23,6 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8327D3581D213F84003CCB11 /* RandomNumberGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RandomNumberGenerator.swift; path = Sources/RandomNumberGenerator.swift; sourceTree = "<group>"; };
 		839D4E931D1C249200BEF8C4 /* Demo.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Demo.playground; sourceTree = "<group>"; };
 		839D4E941D1C249200BEF8C4 /* LICENSE.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = LICENSE.md; sourceTree = "<group>"; };
 		839D4E951D1C249200BEF8C4 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				__PBXFileRef_Sources/AlchemyRandom.swift /* EntropySource.swift */,
+				8327D3581D213F84003CCB11 /* RandomNumberGenerator.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -197,6 +200,7 @@
 			buildActionMask = 0;
 			files = (
 				__src_cc_ref_Sources/AlchemyRandom.swift /* EntropySource.swift in Sources */,
+				8327D3591D213F84003CCB11 /* RandomNumberGenerator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
