@@ -92,13 +92,13 @@ extension RandomNumberGenerator {
 public protocol ReversibleRandomNumberGenerator: RandomNumberGenerator {
 
     /// ...
-    func previousBool() -> Bool
+    mutating func previousBool() -> Bool
     
     /// ...
-    func previousDouble(in range: Range<Double>) -> Double
+    mutating func previousDouble(in range: Range<Double>) -> Double
     
     /// ...
-    func previousInt(in range: Range<Int>) -> Int
+    mutating func previousInt(in range: CountableRange<Int>) -> Int
 }
 
 /// ...
@@ -113,6 +113,186 @@ extension ReversibleRandomNumberGenerator {
     public mutating func previousInt(in range: CountableClosedRange<Int>) -> Int {
         return previousInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
     }
+}
+
+/// ... 
+public struct LecuyerLCG4: ReversibleRandomNumberGenerator {
+
+    /// ...
+    public typealias Seed = (UInt32, UInt32, UInt32, UInt32)
+    
+    /// ... 
+    public static let forward: (UInt64, UInt64, UInt64, UInt64) = (
+        45991,
+        207707,
+        138556,
+        49689
+    )
+
+    /// ...
+    public static let reverse: (UInt64, UInt64, UInt64, UInt64) = (
+        1441196816,
+        1463744518,
+        499766181,
+        660421676
+    )
+
+    /// ...
+    public static let modulus: (UInt64, UInt64, UInt64, UInt64) = (
+        2147483647,
+        2147483543,
+        2147483423,
+        2147483323
+    )
+
+    /// ...
+    public static let normalization: (Double, Double, Double, Double) = (
+        4.65661287524579692e-10,
+        4.65661310075985993e-10,
+        4.65661336096842131e-10,
+        4.65661357780891134e-10
+    )
+    
+    /// ...
+    public init<Source: EntropySource>(source: Source) {
+        var seed0: UInt32 = source.randomBytes()
+        var seed1: UInt32 = source.randomBytes()
+        var seed2: UInt32 = source.randomBytes()
+        var seed3: UInt32 = source.randomBytes()
+        while seed0 == 0 && seed1 == 0 && seed2 == 0 && seed3 == 0 {
+            seed0 = source.randomBytes()
+            seed1 = source.randomBytes()
+            seed2 = source.randomBytes()
+            seed3 = source.randomBytes()
+        }
+        self.init(seed0:seed0, seed1:seed1, seed2:seed2, seed3:seed3)
+    }
+
+    /// ...
+    public init(seed0: UInt32, seed1: UInt32, seed2: UInt32, seed3: UInt32) {
+        precondition(max(seed0, seed1, seed2, seed3) > 0, "A 128-bit seed value of 0x0 is strictly not allowed")
+        self.seed = (seed0, seed1, seed2, seed3)
+    }
+    
+    /// ...
+    private func currentDouble() -> Double {
+        var u: Double = 0.0
+        u = u + LecuyerLCG4.normalization.0 * Double(seed.0)
+        u = u - LecuyerLCG4.normalization.1 * Double(seed.1)
+        if u < 0.0 {
+            u = u + 1.0
+        }
+        u = u + LecuyerLCG4.normalization.2 * Double(seed.2)
+        if u >= 1.0 {
+            u = u - 1.0
+        }
+        u = u - LecuyerLCG4.normalization.3 * Double(seed.3)
+        if u < 0.0 {
+            u = u + 1.0
+        }
+        return u
+    }
+    
+    /// ...
+    private func currentSeed() -> UInt64 {
+        return unsafeBitCast(currentDouble() + 1.0, to:UInt64.self) & UInt64(0x000FFFFFFFFFFFFF)
+    }
+    
+    /// ...
+    public mutating func nextBool() -> Bool {
+        nextSeed()
+        return currentDouble() < 0.5
+    }
+    
+    /// ...
+    public mutating func nextDouble(in range: Range<Double>) -> Double {
+        nextSeed()
+        let min = range.lowerBound
+        let max = range.upperBound
+        return min + (max - min) * currentDouble()
+    }
+    
+    /// ...
+    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
+        let kLength = UInt64(range.count)
+        let kEngine = UInt64(0x000FFFFFFFFFFFFF)
+        let kExcess = kEngine % (kLength + 1)
+        let kLimit = kEngine - kExcess
+        nextSeed()
+        var vSeed = currentSeed()
+        while vSeed > kLimit {
+            nextSeed()
+            vSeed = currentSeed()
+        }
+        return Int(vSeed % kLength) + range.lowerBound
+    }
+
+    /// ...
+    private mutating func nextSeed() {
+        seed.0 = UInt32(LecuyerLCG4.forward.0 * UInt64(seed.0) % LecuyerLCG4.modulus.0)
+        seed.1 = UInt32(LecuyerLCG4.forward.1 * UInt64(seed.1) % LecuyerLCG4.modulus.1)
+        seed.2 = UInt32(LecuyerLCG4.forward.2 * UInt64(seed.2) % LecuyerLCG4.modulus.2)
+        seed.3 = UInt32(LecuyerLCG4.forward.3 * UInt64(seed.3) % LecuyerLCG4.modulus.3)
+    }
+
+    /// ...
+    public mutating func previousBool() -> Bool {
+        previousSeed()
+        return currentDouble() < 0.5
+    }
+    
+    /// ...
+    public mutating func previousDouble(in range: Range<Double>) -> Double {
+        previousSeed()
+        let min = range.lowerBound
+        let max = range.upperBound
+        return min + (max - min) * currentDouble()
+    }
+    
+    /// ...
+    public mutating func previousInt(in range: CountableRange<Int>) -> Int {
+        let kLength = UInt64(range.count)
+        let kEngine = UInt64(0x000FFFFFFFFFFFFF)
+        let kExcess = kEngine % (kLength + 1)
+        let kLimit = kEngine - kExcess
+        previousSeed()
+        var vSeed = currentSeed()
+        while vSeed > kLimit {
+            previousSeed()
+            vSeed = currentSeed()
+        }
+        return Int(vSeed % kLength) + range.lowerBound
+    }
+
+    /// ...
+    private mutating func previousSeed() {
+        seed.0 = UInt32(LecuyerLCG4.reverse.0 * UInt64(seed.0) % LecuyerLCG4.modulus.0)
+        seed.1 = UInt32(LecuyerLCG4.reverse.1 * UInt64(seed.1) % LecuyerLCG4.modulus.1)
+        seed.2 = UInt32(LecuyerLCG4.reverse.2 * UInt64(seed.2) % LecuyerLCG4.modulus.2)
+        seed.3 = UInt32(LecuyerLCG4.reverse.3 * UInt64(seed.3) % LecuyerLCG4.modulus.3)
+    }
+    
+    /// ...
+    public var seed: Seed
+}
+
+/// ...
+extension LecuyerLCG4: CustomStringConvertible {
+    
+    /// ...
+    public var description: String {
+        let seed0 = LecuyerLCG4.describe(seed:seed.0)
+        let seed1 = LecuyerLCG4.describe(seed:seed.1)
+        let seed2 = LecuyerLCG4.describe(seed:seed.2)
+        let seed3 = LecuyerLCG4.describe(seed:seed.3)
+        return "LecuyerLCG4(0x\(seed0)|0x\(seed1)|0x\(seed2)|0x\(seed3))"
+    }
+}
+
+/// ...
+extension LecuyerLCG4: Equatable {}
+public func ==(lhs: LecuyerLCG4, rhs: LecuyerLCG4) -> Bool {
+    return lhs.seed == rhs.seed
 }
 
 /// ...
@@ -134,7 +314,7 @@ public struct Xoroshiro128Plus: RandomNumberGenerator {
     
     /// ...
     public init(seed0: UInt64, seed1: UInt64) {
-        precondition(seed0 != 0 || seed1 != 0, "A 128-bit seed value of 0x0 is strictly not allowed")
+        precondition(max(seed0, seed1) > 0, "A 128-bit seed value of 0x0 is strictly not allowed")
         self.seed = (seed0, seed1)
     }
     
@@ -184,7 +364,7 @@ extension Xoroshiro128Plus: CustomStringConvertible {
     public var description: String {
         let seed0 = Xoroshiro128Plus.describe(seed:seed.0)
         let seed1 = Xoroshiro128Plus.describe(seed:seed.1)
-        return "Xoroshiro128Plus(0x\(seed0)\(seed1))"
+        return "Xoroshiro128Plus(0x\(seed0)|0x\(seed1))"
     }
 }
 
@@ -213,7 +393,7 @@ public struct Xorshift128Plus: RandomNumberGenerator {
 
     /// ...
     public init(seed0: UInt64, seed1: UInt64) {
-        precondition(seed0 != 0 || seed1 != 0, "A 128-bit seed value of 0x0 is strictly not allowed")
+        precondition(max(seed0, seed1) > 0, "A 128-bit seed value of 0x0 is strictly not allowed")
         self.seed = (seed0, seed1)
     }
 
@@ -263,7 +443,7 @@ extension Xorshift128Plus: CustomStringConvertible {
     public var description: String {
         let seed0 = Xorshift128Plus.describe(seed:seed.0)
         let seed1 = Xorshift128Plus.describe(seed:seed.1)
-        return "Xorshift128Plus(0x\(seed0)\(seed1))"
+        return "Xorshift128Plus(0x\(seed0)|0x\(seed1))"
     }
 }
 
