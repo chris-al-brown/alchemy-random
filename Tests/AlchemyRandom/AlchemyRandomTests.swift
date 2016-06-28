@@ -106,14 +106,28 @@ class AlchemyRandomTests: XCTestCase {
     /// ... 
     func testRandomNumberGenerators() {
         assayRandomNumberGeneratorUtils()
-        var xorshift = Xorshift128Plus(source:Arc4Random())
-        assayRandomNumberGenerator(&xorshift)
-        xorshift.seed = (0, 1)
-        assayRandomNumberGenerator(&xorshift)
-        xorshift.seed = (1, 0)
-        assayRandomNumberGenerator(&xorshift)
-        xorshift.seed = (UInt64.max, UInt64.max)
-        assayRandomNumberGenerator(&xorshift)
+        do {
+            /// Xorshift128+
+            var xorshift = Xorshift128Plus(source:Arc4Random())
+            assayRandomNumberGenerator(&xorshift)
+            xorshift.seed = (0, 1)
+            assayRandomNumberGenerator(&xorshift)
+            xorshift.seed = (1, 0)
+            assayRandomNumberGenerator(&xorshift)
+            xorshift.seed = (UInt64.max, UInt64.max)
+            assayRandomNumberGenerator(&xorshift)
+        }
+        do {
+            /// Xoroshiro128+
+            var xoroshiro = Xoroshiro128Plus(source:Arc4Random())
+            assayRandomNumberGenerator(&xoroshiro)
+            xoroshiro.seed = (0, 1)
+            assayRandomNumberGenerator(&xoroshiro)
+            xoroshiro.seed = (1, 0)
+            assayRandomNumberGenerator(&xoroshiro)
+            xoroshiro.seed = (UInt64.max, UInt64.max)
+            assayRandomNumberGenerator(&xoroshiro)
+        }
     }
 
     /// ...

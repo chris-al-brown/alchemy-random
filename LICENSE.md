@@ -36,6 +36,16 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+# [Xoroshiro128+](http://xoroshiro.di.unimi.it/xoroshiro128plus.c)
+
+Written in 2016 by David Blackman and Sebastiano Vigna (vigna@acm.org)
+
+To the extent possible under law, the author has dedicated all copyright
+and related and neighboring rights to this software to the public domain
+worldwide. This software is distributed without any warranty.
+
+See <http://creativecommons.org/publicdomain/zero/1.0/>.
+
 # [Xorshift128+](http://xoroshiro.di.unimi.it/xorshift128plus.c)
 
 Written in 2014-2016 by Sebastiano Vigna (vigna@acm.org)
