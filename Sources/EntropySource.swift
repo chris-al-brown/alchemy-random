@@ -30,16 +30,13 @@ import Foundation
 public protocol EntropySource {
     
     /// ...
-    init()
-
-    /// ...
     func randomBytes() -> UInt32
     
     /// ...
     func randomBytes() -> UInt64
     
     /// ...
-    func randomBytes(in buffer: UnsafeMutablePointer<Void>, count: Int)
+    func randomBytes(destination buffer: UnsafeMutablePointer<Void>, byteCount count: Int)
 }
 
 /// ...
@@ -60,13 +57,22 @@ public struct Arc4Random: EntropySource {
     }
     
     /// ...
-    public func randomBytes(in buffer: UnsafeMutablePointer<Void>, count: Int) {
+    public func randomBytes(destination buffer: UnsafeMutablePointer<Void>, byteCount count: Int) {
         arc4random_buf(buffer, count)
     }
 }
 
+/// ... 
+extension Arc4Random: CustomStringConvertible {
+    
+    /// ...
+    public var description: String {
+        return "Arc4Random()"
+    }
+}
+
 /// ...
-public final class DevRandom: EntropySource {
+public final class DevURandom: EntropySource {
 
     /// ...
     public init() {
@@ -92,9 +98,19 @@ public final class DevRandom: EntropySource {
     }
     
     /// ...
-    public func randomBytes(in buffer: UnsafeMutablePointer<Void>, count: Int) {
+    public func randomBytes(destination buffer: UnsafeMutablePointer<Void>, byteCount count: Int) {
         read(handle.fileDescriptor, buffer, count)
     }
     
     private let handle: FileHandle
 }
+
+/// ...
+extension DevURandom: CustomStringConvertible {
+    
+    /// ...
+    public var description: String {
+        return "DevURandom(\"/dev/urandom\")"
+    }
+}
+

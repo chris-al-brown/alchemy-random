@@ -59,6 +59,20 @@ Check out 'Demo.playground' for example usage.
 
 1. [Random Number Generators in Swift](http://www.cocoawithlove.com/blog/2016/05/19/random-numbers.html)
 
+2. [xoroshiro+ / xorshift* / xorshift+ generators and the PRNG shootout](http://xoroshiro.di.unimi.it)
+
+3. [Pseudo-random number generation](http://en.cppreference.com/w/cpp/numeric/random)
+
+4. [rand(3) / random(3) / arc4random(3) / et al.](http://nshipster.com/random/)
+
+5. [Using rand() (C/C++): Advice for the C standard library's rand() function.](http://eternallyconfuzzled.com/arts/jsw_art_rand.aspx)
+
+6. [A Random Number Generator Based on the Combination of Four LCGs](http://dl.acm.org/citation.cfm?id=271660)
+
+7. [Efficient Optimistic Parallel Simulations using Reverse Computation](http://dl.acm.org/citation.cfm?id=347828)
+
+8. [Generating Poisson random values](http://www.johndcook.com/blog/2010/06/14/generating-poisson-random-values/)
+
 ## License
 
 AlchemyRandom is released under the [MIT License](LICENSE.md).
