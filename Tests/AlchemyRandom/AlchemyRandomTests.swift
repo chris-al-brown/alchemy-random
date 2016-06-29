@@ -57,17 +57,15 @@ class AlchemyRandomTests: XCTestCase {
     
     /// ...
     func assayRandomNumberGeneratorDouble<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int) {
-        let open = (0..<sampleCount).map {_ in return rng.nextDouble(in:0.0..<1.0)}
+        let open = (0..<sampleCount).map {_ in return rng.nextDouble()}
         XCTAssert(open.min() >= 0.0 && open.max() < 1.0, "\(rng) failed range test in [0.0, 1.0)")
-        let closed = (0..<sampleCount).map {_ in return rng.nextDouble(in:0.0...1.0)}
-        XCTAssert(closed.min() >= 0.0 && closed.max() <= 1.0, "\(rng) failed range test in [0.0, 1.0]")
     }
     
     /// ...
     func assayRandomNumberGeneratorInt<RNG: RandomNumberGenerator where RNG: Equatable>(_ rng: inout RNG, sampleCount: Int) {
-        let open = (0..<sampleCount).map {_ in return rng.nextInt(in:0..<10)}
+        let open = (0..<sampleCount).map {_ in return rng.nextInt(lessThan:10)}
         XCTAssert(open.min() == 0 && open.max() < 10, "\(rng) failed range test in [0, 10)")
-        let closed = (0..<sampleCount).map {_ in return rng.nextInt(in:0...10)}
+        let closed = (0..<sampleCount).map {_ in return rng.nextInt(lessThan:11)}
         XCTAssert(closed.min() == 0 && closed.max() == 10, "\(rng) failed range test in [0, 10]")
     }
 
@@ -123,9 +121,9 @@ class AlchemyRandomTests: XCTestCase {
             
             for _ in 0..<25_000 {
                 lecuyer = LecuyerLCG4(source:Arc4Random())
-                let value1 = lecuyer.nextDouble(in:0.0..<1.0)
-                _ = lecuyer.nextDouble(in:0.0..<1.0)
-                let value2 = lecuyer.previousDouble(in:0.0..<1.0)
+                let value1 = lecuyer.nextDouble()
+                _ = lecuyer.nextDouble()
+                let value2 = lecuyer.previousDouble()
                 XCTAssert(value1 == value2, "\(lecuyer) failed reversibility test")
             }
         }

@@ -35,14 +35,14 @@ public protocol RandomNumberGenerator {
     /// ...
     init<Source: EntropySource>(source: Source)
 
-    /// ...
+    /// Returns the next boolean value
     mutating func nextBool() -> Bool
-
-    /// ...
-    mutating func nextDouble(in range: Range<Double>) -> Double
-
-    /// ...
-    mutating func nextInt(in range: CountableRange<Int>) -> Int
+    
+    /// Returns the next continuous value in [0.0, 1.0)
+    mutating func nextDouble() -> Double
+    
+    /// Returns the next discrete value in {0, 1, ..., value - 1}
+    mutating func nextInt(lessThan value: Int) -> Int
 
     /// ...
     var seed: Seed { get mutating set }
@@ -51,7 +51,7 @@ public protocol RandomNumberGenerator {
 /// ...
 extension RandomNumberGenerator {
     
-    /// Returns a uniform value in the range [0.0, 1.0)
+    /// Returns a uniform value in the half-open range [0.0, 1.0)
     public static func bitCast(seed: UInt32) -> Float {
         let kExponentBits = UInt32(0x3F800000)
         let kMantissaMask = UInt32(0x007FFFFF)
@@ -59,7 +59,7 @@ extension RandomNumberGenerator {
         return unsafeBitCast(u, to:Float.self) - 1.0
     }
     
-    /// Returns a uniform value in the range [0.0, 1.0)
+    /// Returns a uniform value in the half-open range [0.0, 1.0)
     public static func bitCast(seed: UInt64) -> Double {
         let kExponentBits = UInt64(0x3FF0000000000000)
         let kMantissaMask = UInt64(0x000FFFFFFFFFFFFF)
@@ -76,43 +76,19 @@ extension RandomNumberGenerator {
     public static func describe(seed: UInt64, uppercase: Bool = false) -> String {
         return String(seed, radix:16, uppercase:uppercase)
     }
-    
-    /// ...
-    public mutating func nextDouble(in range: ClosedRange<Double>) -> Double {
-        return nextDouble(in:range.lowerBound..<range.upperBound.nextUp)
-    }
-    
-    /// ...
-    public mutating func nextInt(in range: CountableClosedRange<Int>) -> Int {
-        return nextInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
-    }
 }
 
 /// ...
 public protocol ReversibleRandomNumberGenerator: RandomNumberGenerator {
 
-    /// ...
+    /// Returns the previous boolean value
     mutating func previousBool() -> Bool
     
-    /// ...
-    mutating func previousDouble(in range: Range<Double>) -> Double
+    /// Returns the previous continuous value in [0.0, 1.0)
+    mutating func previousDouble() -> Double
     
-    /// ...
-    mutating func previousInt(in range: CountableRange<Int>) -> Int
-}
-
-/// ...
-extension ReversibleRandomNumberGenerator {
-    
-    /// ...
-    public mutating func previousDouble(in range: ClosedRange<Double>) -> Double {
-        return previousDouble(in:range.lowerBound..<range.upperBound.nextUp)
-    }
-    
-    /// ...
-    public mutating func previousInt(in range: CountableClosedRange<Int>) -> Int {
-        return previousInt(in:range.lowerBound..<range.upperBound.advanced(by:1))
-    }
+    /// Returns the previous discrete value in {0, 1, ..., value - 1}
+    mutating func previousInt(lessThan value: Int) -> Int
 }
 
 /// ... 
@@ -200,23 +176,20 @@ public struct LecuyerLCG4: ReversibleRandomNumberGenerator {
     
     /// ...
     public mutating func nextBool() -> Bool {
-        nextSeed()
-        return currentDouble() < 0.5
+        return nextDouble() < 0.5
     }
     
     /// ...
-    public mutating func nextDouble(in range: Range<Double>) -> Double {
+    public mutating func nextDouble() -> Double {
         nextSeed()
-        let min = range.lowerBound
-        let max = range.upperBound
-        return min + (max - min) * currentDouble()
+        return currentDouble()
     }
     
     /// ...
-    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
-        let kLength = UInt64(range.count)
+    public mutating func nextInt(lessThan value: Int) -> Int {
+        let kLength = UInt64(value)
         let kEngine = UInt64(0x000FFFFFFFFFFFFF)
-        let kExcess = kEngine % (kLength + 1)
+        let kExcess = kEngine % kLength
         let kLimit = kEngine - kExcess
         nextSeed()
         var vSeed = currentSeed()
@@ -224,7 +197,7 @@ public struct LecuyerLCG4: ReversibleRandomNumberGenerator {
             nextSeed()
             vSeed = currentSeed()
         }
-        return Int(vSeed % kLength) + range.lowerBound
+        return Int(vSeed % kLength)
     }
 
     /// ...
@@ -237,23 +210,20 @@ public struct LecuyerLCG4: ReversibleRandomNumberGenerator {
 
     /// ...
     public mutating func previousBool() -> Bool {
-        previousSeed()
-        return currentDouble() < 0.5
+        return previousDouble() < 0.5
     }
     
     /// ...
-    public mutating func previousDouble(in range: Range<Double>) -> Double {
+    public mutating func previousDouble() -> Double {
         previousSeed()
-        let min = range.lowerBound
-        let max = range.upperBound
-        return min + (max - min) * currentDouble()
+        return currentDouble()
     }
     
     /// ...
-    public mutating func previousInt(in range: CountableRange<Int>) -> Int {
-        let kLength = UInt64(range.count)
+    public mutating func previousInt(lessThan value: Int) -> Int {
+        let kLength = UInt64(value)
         let kEngine = UInt64(0x000FFFFFFFFFFFFF)
-        let kExcess = kEngine % (kLength + 1)
+        let kExcess = kEngine % kLength
         let kLimit = kEngine - kExcess
         previousSeed()
         var vSeed = currentSeed()
@@ -261,7 +231,7 @@ public struct LecuyerLCG4: ReversibleRandomNumberGenerator {
             previousSeed()
             vSeed = currentSeed()
         }
-        return Int(vSeed % kLength) + range.lowerBound
+        return Int(vSeed % kLength)
     }
 
     /// ...
@@ -383,23 +353,21 @@ public struct MersenneTwister: RandomNumberGenerator {
     }
     
     /// ...
-    public mutating func nextDouble(in range: Range<Double>) -> Double {
-        let min = range.lowerBound
-        let max = range.upperBound
-        return min + (max - min) * MersenneTwister.bitCast(seed:nextSeed())
+    public mutating func nextDouble() -> Double {
+        return MersenneTwister.bitCast(seed:nextSeed())
     }
     
     /// ...
-    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
-        let kLength = UInt64(range.count)
+    public mutating func nextInt(lessThan value: Int) -> Int {
+        let kLength = UInt64(value)
         let kEngine = UInt64.max
-        let kExcess = kEngine % (kLength + 1)
+        let kExcess = kEngine % kLength
         let kLimit = kEngine - kExcess
         var vSeed = nextSeed()
         while vSeed > kLimit {
             vSeed = nextSeed()
         }
-        return Int(vSeed % kLength) + range.lowerBound
+        return Int(vSeed % kLength)
     }
     
     /// ...
@@ -796,7 +764,6 @@ public func ==(lhs: MersenneTwister, rhs: MersenneTwister) -> Bool {
     return true
 }
 
-
 /// ...
 public struct Xoroshiro128Plus: RandomNumberGenerator {
 
@@ -819,30 +786,28 @@ public struct Xoroshiro128Plus: RandomNumberGenerator {
         precondition(max(seed0, seed1) > 0, "A 128-bit seed value of 0x0 is strictly not allowed")
         self.seed = (seed0, seed1)
     }
-    
+
     /// ...
     public mutating func nextBool() -> Bool {
         return nextSeed() % 2 == 0
     }
     
     /// ...
-    public mutating func nextDouble(in range: Range<Double>) -> Double {
-        let min = range.lowerBound
-        let max = range.upperBound
-        return min + (max - min) * Xoroshiro128Plus.bitCast(seed:nextSeed())
+    public mutating func nextDouble() -> Double {
+        return Xoroshiro128Plus.bitCast(seed:nextSeed())
     }
     
     /// ...
-    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
-        let kLength = UInt64(range.count)
+    public mutating func nextInt(lessThan value: Int) -> Int {
+        let kLength = UInt64(value)
         let kEngine = UInt64.max
-        let kExcess = kEngine % (kLength + 1)
+        let kExcess = kEngine % kLength
         let kLimit = kEngine - kExcess
         var vSeed = nextSeed()
         while vSeed > kLimit {
             vSeed = nextSeed()
         }
-        return Int(vSeed % kLength) + range.lowerBound
+        return Int(vSeed % kLength)
     }
     
     /// ...
@@ -892,38 +857,36 @@ public struct Xorshift128Plus: RandomNumberGenerator {
         }
         self.init(seed0:seed0, seed1:seed1)
     }
-
+    
     /// ...
     public init(seed0: UInt64, seed1: UInt64) {
         precondition(max(seed0, seed1) > 0, "A 128-bit seed value of 0x0 is strictly not allowed")
         self.seed = (seed0, seed1)
     }
-
+    
     /// ...
     public mutating func nextBool() -> Bool {
         return nextSeed() % 2 == 0
     }
     
     /// ...
-    public mutating func nextDouble(in range: Range<Double>) -> Double {
-        let min = range.lowerBound
-        let max = range.upperBound
-        return min + (max - min) * Xorshift128Plus.bitCast(seed:nextSeed())
+    public mutating func nextDouble() -> Double {
+        return Xorshift128Plus.bitCast(seed:nextSeed())
     }
     
     /// ...
-    public mutating func nextInt(in range: CountableRange<Int>) -> Int {
-        let kLength = UInt64(range.count)
+    public mutating func nextInt(lessThan value: Int) -> Int {
+        let kLength = UInt64(value)
         let kEngine = UInt64.max
-        let kExcess = kEngine % (kLength + 1)
+        let kExcess = kEngine % kLength
         let kLimit = kEngine - kExcess
         var vSeed = nextSeed()
         while vSeed > kLimit {
             vSeed = nextSeed()
         }
-        return Int(vSeed % kLength) + range.lowerBound
+        return Int(vSeed % kLength)
     }
-
+    
     /// ...
     private mutating func nextSeed() -> UInt64 {
         var s1 = seed.0
@@ -954,5 +917,6 @@ extension Xorshift128Plus: Equatable {}
 public func ==(lhs: Xorshift128Plus, rhs: Xorshift128Plus) -> Bool {
     return lhs.seed == rhs.seed
 }
+
 
 

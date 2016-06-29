@@ -33,7 +33,7 @@ public protocol Distribution {
     associatedtype Sample
     
     /// ...
-    mutating func randomSample<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Sample
+    mutating func random<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Sample
 }
 
 /// ...
@@ -43,13 +43,13 @@ public struct Uniform: Distribution {
     public typealias Sample = Double
     
     /// ...
-    public init(bounds: Range<Double> = 0.0..<1.0) {
+    public init(bounds: Range<Double>) {
         self.bounds = bounds
     }
     
     /// ...
-    public mutating func randomSample<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Double {
-        return (bounds.upperBound - bounds.lowerBound) * rng.nextDouble(in:0.0..<1.0) + bounds.lowerBound
+    public mutating func random<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Double {
+        return (bounds.upperBound - bounds.lowerBound) * rng.nextDouble() + bounds.lowerBound
     }
     
     /// ...
