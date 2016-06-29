@@ -107,6 +107,38 @@ class AlchemyRandomTests: XCTestCase {
     func testRandomNumberGenerators() {
         assayRandomNumberGeneratorUtils()
         do {
+            /// LecuyerLCG4
+            var lecuyer = LecuyerLCG4(source:Arc4Random())
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            lecuyer.seed = (1, 0, 0, 0)
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            lecuyer.seed = (0, 1, 0, 0)
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            lecuyer.seed = (0, 0, 1, 0)
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            lecuyer.seed = (0, 0, 0, 1)
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            lecuyer.seed = (UInt32.max, UInt32.max, UInt32.max, UInt32.max)
+            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
+            
+            for _ in 0..<25_000 {
+                lecuyer = LecuyerLCG4(source:Arc4Random())
+                let value1 = lecuyer.nextDouble(in:0.0..<1.0)
+                _ = lecuyer.nextDouble(in:0.0..<1.0)
+                let value2 = lecuyer.previousDouble(in:0.0..<1.0)
+                XCTAssert(value1 == value2, "\(lecuyer) failed reversibility test")
+            }
+        }
+        do {
+            /// MersenneTwister
+            var twister = MersenneTwister(source:Arc4Random())
+            assayRandomNumberGenerator(&twister, bias:0.01, sampleCount:50_000)
+            twister = MersenneTwister(seed:0)
+            assayRandomNumberGenerator(&twister, bias:0.01, sampleCount:50_000)
+            twister = MersenneTwister(seed:UInt64.max)
+            assayRandomNumberGenerator(&twister, bias:0.01, sampleCount:50_000)
+        }
+        do {
             /// Xorshift128+
             var xorshift = Xorshift128Plus(source:Arc4Random())
             assayRandomNumberGenerator(&xorshift, bias:0.01, sampleCount:50_000)
@@ -127,29 +159,6 @@ class AlchemyRandomTests: XCTestCase {
             assayRandomNumberGenerator(&xoroshiro, bias:0.01, sampleCount:50_000)
             xoroshiro.seed = (UInt64.max, UInt64.max)
             assayRandomNumberGenerator(&xoroshiro, bias:0.01, sampleCount:50_000)
-        }
-        do {
-            /// LecuyerLCG4
-            var lecuyer = LecuyerLCG4(source:Arc4Random())
-            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
-            lecuyer.seed = (1, 0, 0, 0)
-            assayRandomNumberGenerator(&lecuyer, bias:0.02, sampleCount:25_000)
-            lecuyer.seed = (0, 1, 0, 0)
-            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
-            lecuyer.seed = (0, 0, 1, 0)
-            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
-            lecuyer.seed = (0, 0, 0, 1)
-            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
-            lecuyer.seed = (UInt32.max, UInt32.max, UInt32.max, UInt32.max)
-            assayRandomNumberGenerator(&lecuyer, bias:0.01, sampleCount:25_000)
-            
-            for _ in 0..<25_000 {
-                lecuyer = LecuyerLCG4(source:Arc4Random())
-                let value1 = lecuyer.nextDouble(in:0.0..<1.0)
-                _ = lecuyer.nextDouble(in:0.0..<1.0)
-                let value2 = lecuyer.previousDouble(in:0.0..<1.0)
-                XCTAssert(value1 == value2, "\(lecuyer) failed reversibility test")
-            }
         }
     }
 

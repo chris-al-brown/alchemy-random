@@ -50,7 +50,7 @@ var values: [Int: Int] = [:]
 for i in range.lowerBound...range.upperBound {
     values[i] = 0
 }
-for i in 0..<1_000_000 {
+for i in 0..<100_000 {
     values[xorshift.nextInt(in:range)]! += 1
 }
 values
@@ -71,3 +71,8 @@ lecuyer.nextDouble(in:0.0..<1.0)
 lecuyer.nextDouble(in:0.0..<1.0)
 lecuyer.previousDouble(in:0.0..<1.0)
 lecuyer.previousDouble(in:0.0..<1.0)
+
+
+
+
+
