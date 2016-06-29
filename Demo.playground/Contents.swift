@@ -24,55 +24,43 @@
 // 06/23/2016
 // -----------------------------------------------------------------------------
 
-import Foundation
 import AlchemyRandom
 
-let arc4 = Arc4Random()
-arc4.randomBytes() as UInt32
-arc4.randomBytes() as UInt32
-arc4.randomBytes() as UInt32
-arc4.randomBytes() as UInt32
+/// Make a new entropy source
+let source = Arc4Random()
 
-let dev = DevURandom()
-dev.randomBytes() as UInt32
-dev.randomBytes() as UInt32
-dev.randomBytes() as UInt32
-dev.randomBytes() as UInt32
+/// Seed a new random number generator from the entropy source
+var xorshift = Xorshift128Plus(source:source)
 
-var xorshift = Xorshift128Plus(source:dev)
-xorshift.nextBool()
-xorshift.nextBool()
-xorshift.nextBool()
-xorshift.nextBool()
+/// Generate some booleans
+let booleans = [xorshift.nextBool(), xorshift.nextBool(), xorshift.nextBool()]
 
-var range = 0...10
-var values: [Int: Int] = [:]
-for i in range.lowerBound...range.upperBound {
-    values[i] = 0
-}
-for i in 0..<100_000 {
-    values[xorshift.nextInt(in:range)]! += 1
-}
-values
+/// Generate some ints
+let irange = 0...2
+let ints = [xorshift.nextInt(in:irange), xorshift.nextInt(in:irange), xorshift.nextInt(in:irange)]
 
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
-xorshift.nextDouble(in:0.0...1.0)
+/// Generate some doubles
+let drange = 0.0..<1.0
+let doubles = [xorshift.nextDouble(in:drange), xorshift.nextDouble(in:drange), xorshift.nextDouble(in:drange)]
 
+/// Make a reversible random number generator seeded from /dev/urandom
 var lecuyer = LecuyerLCG4(source:DevURandom())
-lecuyer.nextDouble(in:0.0..<1.0)
-lecuyer.nextDouble(in:0.0..<1.0)
-lecuyer.previousDouble(in:0.0..<1.0)
-lecuyer.previousDouble(in:0.0..<1.0)
 
+/// Generate some forward values
+let f1 = lecuyer.nextDouble(in:drange)
+let f2 = lecuyer.nextDouble(in:drange)
+let f3 = lecuyer.nextDouble(in:drange)
+let f4 = lecuyer.nextDouble(in:drange)
+let f5 = lecuyer.nextDouble(in:drange)
 
+/// Now reverse and generate values
+let r4 = lecuyer.previousDouble(in:drange)
+let r3 = lecuyer.previousDouble(in:drange)
+let r2 = lecuyer.previousDouble(in:drange)
+let r1 = lecuyer.previousDouble(in:drange)
 
-
-
+/// Compare == "Magic"
+r1 == f1
+r2 == f2
+r3 == f3
+r4 == f4

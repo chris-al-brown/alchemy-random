@@ -14,7 +14,6 @@
     <a href="#usage">Usage</a>
     <a href="#references">References</a>
     <a href="#license">License</a>
-    <a href="#todo">TODO</a>
 </p>
 
 AlchemyRandom is a Swift package for random number generators and distributions
@@ -30,7 +29,7 @@ AlchemyRandom is a Swift package for random number generators and distributions
 
 While AlchemyRandom has only been tested on OS X with a beta version of Xcode, 
 it should presumably work on iOS, tvOS, and watchOS as well.  It only depends on the 
-the Swift standard library with optional added extensions to CoreGraphics and simd. 
+the Swift standard library. 
 
 ## Installation
 
@@ -44,7 +43,7 @@ import PackageDescription
 let package = Package(
     name: "MyProjectUsingAlchemyRandom",
     dependencies: [
-        .Package(url: "https://github.com/chris-al-brown/alchemy-random", majorVersion: 0, minor: 1)
+        .Package(url: "https://github.com/chris-al-brown/alchemy-random", majorVersion: 0, minor: 2)
     ]
 )
 ```
@@ -76,5 +75,3 @@ Check out 'Demo.playground' for example usage.
 ## License
 
 AlchemyRandom is released under the [MIT License](LICENSE.md).
-
-## TODO
