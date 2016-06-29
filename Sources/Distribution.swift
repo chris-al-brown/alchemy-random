@@ -33,7 +33,57 @@ public protocol Distribution {
     associatedtype Sample
     
     /// ...
-    mutating func randomSample<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Sample
+    mutating func random<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Sample
+}
+
+/// ...
+public struct Gaussian: Distribution {
+    
+    /// ...
+    public init(mean: Double = 0.0, stddev: Double = 1.0) {
+        self.mean = mean
+        self.stddev = stddev
+        self._z0 = 0.0
+        self._z1 = 0.0
+        self._generate = false
+    }
+    
+    /// ...
+    public mutating func random<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Double {
+        _generate = !_generate
+        if !_generate {
+            return _z1 * stddev + mean
+        }
+        var u1: Double = 0.0
+        var u2: Double = 0.0
+        repeat {
+            u1 = rng.nextDouble()
+            u2 = rng.nextDouble()
+        } while u1 <= DBL_EPSILON
+        _z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2)
+        _z1 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2)
+        return _z0 * stddev + mean
+    }
+    
+    /// ...
+    public var mean: Double
+    
+    /// ...
+    public var stddev: Double
+    
+    /// ...
+    private var _z0: Double
+    private var _z1: Double
+    private var _generate: Bool
+}
+
+/// ...
+extension Gaussian: CustomStringConvertible {
+    
+    /// ...
+    public var description: String {
+        return "Gaussian(μ = \(mean), σ = \(stddev))"
+    }
 }
 
 /// ...
@@ -43,13 +93,13 @@ public struct Uniform: Distribution {
     public typealias Sample = Double
     
     /// ...
-    public init(bounds: Range<Double> = 0.0..<1.0) {
+    public init(bounds: Range<Double>) {
         self.bounds = bounds
     }
     
     /// ...
-    public mutating func randomSample<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Double {
-        return (bounds.upperBound - bounds.lowerBound) * rng.nextDouble(in:0.0..<1.0) + bounds.lowerBound
+    public mutating func random<RNG: RandomNumberGenerator>(_ rng: inout RNG) -> Double {
+        return (bounds.upperBound - bounds.lowerBound) * rng.nextDouble() + bounds.lowerBound
     }
     
     /// ...

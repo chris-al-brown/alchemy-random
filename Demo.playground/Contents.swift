@@ -36,28 +36,26 @@ var xorshift = Xorshift128Plus(source:source)
 let booleans = [xorshift.nextBool(), xorshift.nextBool(), xorshift.nextBool()]
 
 /// Generate some ints
-let irange = 0...100
-let ints = [xorshift.nextInt(in:irange), xorshift.nextInt(in:irange), xorshift.nextInt(in:irange)]
+let ints = [xorshift.nextInt(lessThan:5), xorshift.nextInt(lessThan:5), xorshift.nextInt(lessThan:5)]
 
 /// Generate some doubles
-let drange = 0.0..<1.0
-let doubles = [xorshift.nextDouble(in:drange), xorshift.nextDouble(in:drange), xorshift.nextDouble(in:drange)]
+let doubles = [xorshift.nextDouble(), xorshift.nextDouble(), xorshift.nextDouble()]
 
 /// Make a reversible random number generator seeded from /dev/urandom
 var lecuyer = LecuyerLCG4(source:DevURandom())
 
 /// Generate some forward values
-let f1 = lecuyer.nextDouble(in:drange)
-let f2 = lecuyer.nextDouble(in:drange)
-let f3 = lecuyer.nextDouble(in:drange)
-let f4 = lecuyer.nextDouble(in:drange)
-let f5 = lecuyer.nextDouble(in:drange)
+let f1 = lecuyer.nextDouble()
+let f2 = lecuyer.nextDouble()
+let f3 = lecuyer.nextDouble()
+let f4 = lecuyer.nextDouble()
+let f5 = lecuyer.nextDouble()
 
 /// Now reverse and generate values
-let r4 = lecuyer.previousDouble(in:drange)
-let r3 = lecuyer.previousDouble(in:drange)
-let r2 = lecuyer.previousDouble(in:drange)
-let r1 = lecuyer.previousDouble(in:drange)
+let r4 = lecuyer.previousDouble()
+let r3 = lecuyer.previousDouble()
+let r2 = lecuyer.previousDouble()
+let r1 = lecuyer.previousDouble()
 
 /// Compare == "Magic"
 r1 == f1
@@ -67,12 +65,20 @@ r4 == f4
 
 /// Make a distribution and generate some numbers
 var rng = MersenneTwister(source:source)
-var uniform = Uniform()
-uniform.randomSample(&rng)
-uniform.randomSample(&rng)
-uniform.randomSample(&rng)
-uniform.randomSample(&rng)
-uniform.randomSample(&rng)
+var uniform = Uniform(bounds:-1.0..<1.0)
+uniform.random(&rng)
+uniform.random(&rng)
+uniform.random(&rng)
+uniform.random(&rng)
+uniform.random(&rng)
+
+var gaussian = Gaussian()
+gaussian.random(&rng)
+gaussian.random(&rng)
+gaussian.random(&rng)
+gaussian.random(&rng)
+gaussian.random(&rng)
+
 
 
 
