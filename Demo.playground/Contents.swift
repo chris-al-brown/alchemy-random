@@ -36,7 +36,7 @@ var xorshift = Xorshift128Plus(source:source)
 let booleans = [xorshift.nextBool(), xorshift.nextBool(), xorshift.nextBool()]
 
 /// Generate some ints
-let irange = 0...2
+let irange = 0...100
 let ints = [xorshift.nextInt(in:irange), xorshift.nextInt(in:irange), xorshift.nextInt(in:irange)]
 
 /// Generate some doubles
@@ -64,3 +64,15 @@ r1 == f1
 r2 == f2
 r3 == f3
 r4 == f4
+
+/// Make a distribution and generate some numbers
+var rng = MersenneTwister(source:source)
+var uniform = Uniform()
+uniform.randomSample(&rng)
+uniform.randomSample(&rng)
+uniform.randomSample(&rng)
+uniform.randomSample(&rng)
+uniform.randomSample(&rng)
+
+
+
