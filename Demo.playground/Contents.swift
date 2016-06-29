@@ -36,7 +36,7 @@ var xorshift = Xorshift128Plus(source:source)
 let booleans = [xorshift.nextBool(), xorshift.nextBool(), xorshift.nextBool()]
 
 /// Generate some ints
-let ints = [xorshift.nextInt(lessThan:100), xorshift.nextInt(lessThan:100), xorshift.nextInt(lessThan:100)]
+let ints = [xorshift.nextInt(lessThan:5), xorshift.nextInt(lessThan:5), xorshift.nextInt(lessThan:5)]
 
 /// Generate some doubles
 let doubles = [xorshift.nextDouble(), xorshift.nextDouble(), xorshift.nextDouble()]
@@ -71,6 +71,14 @@ uniform.random(&rng)
 uniform.random(&rng)
 uniform.random(&rng)
 uniform.random(&rng)
+
+var gaussian = Gaussian()
+gaussian.random(&rng)
+gaussian.random(&rng)
+gaussian.random(&rng)
+gaussian.random(&rng)
+gaussian.random(&rng)
+
 
 
 
