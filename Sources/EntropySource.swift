@@ -86,14 +86,14 @@ public final class DevURandom: EntropySource {
     /// ...
     public func randomBytes() -> UInt32 {
         var output: UInt32 = 0
-        read(handle.fileDescriptor, &output, sizeof(UInt32))
+        read(handle.fileDescriptor, &output, sizeof(UInt32.self))
         return output
     }
     
     /// ...
     public func randomBytes() -> UInt64 {
         var output: UInt64 = 0
-        read(handle.fileDescriptor, &output, sizeof(UInt64))
+        read(handle.fileDescriptor, &output, sizeof(UInt64.self))
         return output
     }
     
