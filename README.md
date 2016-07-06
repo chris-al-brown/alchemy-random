@@ -21,11 +21,11 @@ AlchemyRandom is a Swift package for random number generators and distributions
 ## Requirements
 
 - Xcode
-    - Version: **8.0 beta (8S128d)**
+    - Version: **8.0 beta 2 (8S162m)**
     - Language: **Swift 3.0**
 - OS X
     - Latest SDK: **macOS 10.12**
-    - Deployment Target: **OS X 10.10**
+    - Deployment Target: **macOS 10.10**
 
 While AlchemyRandom has only been tested on OS X with a beta version of Xcode, 
 it should presumably work on iOS, tvOS, and watchOS as well.  It only depends on the 
